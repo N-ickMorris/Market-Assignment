@@ -1,0 +1,30 @@
+reset;  # clear the work space
+
+param PathOut symbolic default "/shared/kgcoe-research/gates/Budget-Uncertainty/";  # pick where the solution data files are exported to
+set segmentations := {2, 4, 8, 12};  # pick a set of market segmentations to solve for
+model risk-qap.mod;  # load the model file
+
+for{m in segmentations}
+{
+	# ---- solve the problem ----
+	
+	reset data;  # delete any data
+	let Markets := 1..m;  # build the desired market system
+	data risk-qap.dat;  # load the data file
+	let size := ceil((0.50 * card(Countries)) / card(Markets));  # compute the minimum number of countries required to build a market
+	
+	option solver knitro;  # choose a solver
+	option knitro_options 'ms_enable=1 ma_terminate=0 mip_integral_gap_rel=1e-5';  # in the order it appears (comma seperated): enable multi start, let the solver decide how many multiple start points to use based on problem size, pick the precision (significant figures) for which a number (any integer variable you want to solve for) is considered an integer
+	option display_eps 1e-5;  # machine precision on all variables (ie. the smallest magnitude in the decimal place for which a number is considered different from zero)
+	solve;  # solve the problem instance
+	
+	# ---- export the solution ----
+	
+	option print_round 0;  # set the rounding to 0 decimal places when printing numbers
+	option print_separator ",";  # set the seperator to be a comma when printing
+	
+	print "Market", "Country", "Assigned" >> (PathOut & "Risk-QAP-Results-Markets-" & m & "-Penalty-2-Size-50percent.txt");  # print out a header for our solution data file
+	print {i in Markets, j in Countries}: i, j, x[i,j] >> (PathOut & "Risk-QAP-Results-Markets-" & m & "-Penalty-2-Size-50percent.txt");  # print out the solution data
+	close (PathOut & "Risk-QAP-Results-Markets-" & m & "-Penalty-2-Size-50percent.txt");  # close off the connection to our solution data file
+}
+
