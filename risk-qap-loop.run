@@ -1,6 +1,6 @@
 reset;  # clear the work space
 
-param PathOut symbolic default "/shared/kgcoe-research/gates/Budget-Uncertainty/";  # pick where the solution data files are exported to
+param PathOut symbolic default "/shared/ ... /Budget-Uncertainty/";  # pick where the solution data files are exported to
 set segmentations := {2, 4, 8, 12};  # pick a set of market segmentations to solve for
 model risk-qap.mod;  # load the model file
 
